@@ -1,8 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 
-def remove_spaces(text):
-    return ' '.join(text.split())
+
+def remove_spaces(text, start=0):
+    return ' '.join(text.split()[start:])
 
 
 if __name__ == '__main__':
@@ -10,17 +11,15 @@ if __name__ == '__main__':
     url = 'https://povar.ru/recipes/salat_s_blinami_i_gribami-79753.html'
     r = requests.get(url)
 
-    soup = BeautifulSoup(r.text, "html.parser")
-    dishes_names = soup.find_all('h1', class_='detailed')  # ищем название блюда
-    dish_name = dishes_names[0].text
-
     new_url = r.request.url  # получаем ссылку
 
-    general_description = soup.find_all('span', class_='detailed_full', itemprop='description')
-    # получаем общее описание
-    general_description = ' '.join(general_description[0].text.split())
+    soup = BeautifulSoup(r.text, "html.parser")
+    dish_name = soup.find('h1', class_='detailed').text  # ищем название блюда
 
-    description = ' '.join(soup.find_all('h2', class_='span')[0].parent.text.split()[2:])
+    general_description = remove_spaces(soup.find('span', class_='detailed_full', itemprop='description').text)
+    # получаем общее описание
+
+    description = remove_spaces(soup.find('h2', class_='span').parent.text, 2)
     # получаем описание приготовления
 
     ingredients_code = soup.find_all('li', itemprop='recipeIngredient')  # ингредиенты
@@ -31,4 +30,14 @@ if __name__ == '__main__':
         full_ingredients.append(remove_spaces(ingredient.text))
         ingredients.append(remove_spaces(ingredient.attrs['rel']))
 
-    print('')
+    tags_code = soup.find_all('span', class_='detailed_tags')[0].find_all('a')  # теги
+    tags = []
+
+    for tag in tags_code:
+        tags.append(remove_spaces(tag.text))
+
+    number_of_servings = soup.find_all('em', itemprop='recipeYield')[0].text  # количество порций
+
+    image = soup.find('div', class_='bigImgBox').find('img').attrs['src']  # картинка
+
+    test = True
