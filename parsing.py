@@ -11,7 +11,7 @@ if __name__ == '__main__':
     url = 'https://povar.ru/recipes/salat_s_blinami_i_gribami-79753.html'
     r = requests.get(url)
 
-    new_url = r.request.url  # получаем ссылку
+    link = r.request.url  # получаем ссылку
 
     soup = BeautifulSoup(r.text, "html.parser")
     dish_name = soup.find('h1', class_='detailed').text  # ищем название блюда
@@ -23,11 +23,11 @@ if __name__ == '__main__':
     # получаем описание приготовления
 
     ingredients_code = soup.find_all('li', itemprop='recipeIngredient')  # ингредиенты
-    full_ingredients = []  # полное описание ингредиентов с количеством
+    full_ingredients = ''  # полное описание ингредиентов с количеством
     ingredients = []  # только ингредиенты
 
     for ingredient in ingredients_code:
-        full_ingredients.append(remove_spaces(ingredient.text))
+        full_ingredients += remove_spaces(ingredient.text) + '\n'
         ingredients.append(remove_spaces(ingredient.attrs['rel']))
 
     tags_code = soup.find_all('span', class_='detailed_tags')[0].find_all('a')  # теги
